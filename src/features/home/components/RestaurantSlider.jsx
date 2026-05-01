@@ -53,13 +53,13 @@ const ResturantSlider = ({ slider }) => {
       <div className="flex flex-col justify-center items-start mb-10 mt-4 relative ">
         <div
           ref={slidesContainerRef}
-          className="slides-container flex overflow-hidden space-x-2 rounded scroll-smooth w-full">
+          className="slides-container flex overflow-hidden space-x-3 rounded scroll-smooth w-full">
           {slider?.map((data) => {
             return (
               <div
                 key={data?.info?.id}
                 ref={slideRef}
-                className={`w-96 object-cover slide flex-shrink-0 snap-center rounded overflow-hidden `}>
+                className={`w-[19.5rem] object-cover slide flex-shrink-0 snap-center rounded overflow-hidden `}>
                 <RestaurantCard data={{ ...data.info }} key={data?.info?.id} />
               </div>
             );

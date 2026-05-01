@@ -39,57 +39,71 @@ const RestaurantView = () => {
     }
   }, [scroll]);
 
-  console.log('restData', { restData, OfferData, categories });
 
   if (!Data) return <div>Loading.</div>;
   if (!OfferData) return <div>Loading..</div>;
   if (!categories) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-3xl px-md-0 px-10 mx-auto my-20 flex flex-col gap-5">
+    <div className="max-w-4xl px-md-0 px-10 mx-auto my-20 flex flex-col gap-5">
       {Data !== undefined && (
         <>
-          <div ref={scroll} className="flex justify-between flex-wrap">
-            <div>
-              <div className="text-sm md:text-xl font-bold text-gray-700">
-                {Data?.info?.name}
-              </div>
-              <div className="flex text-sm md:text-[15px] text-gray-500">
-                {Data?.info?.cuisines?.join(', ')}
-              </div>
-              <div className="flex gap-2 text-sm md:text-[15px] text-gray-500">
-                <div>{Data?.info?.areaName},</div>
-                <div>{Data?.info?.sla.lastMileTravelString}</div>
-              </div>
-            </div>
-            <div className="border border-gray-200 rounded-xl flex flex-col justify-between px-3 py-2">
-              <div className="text-green-700 flex gap-1 items-center font-bold tracking-tighter">
-                <IoStar size={18} /> {Data?.info?.avgRatingString}
-              </div>
-              <div className="text-xs border-gray-200 border-t pt-2 text-gray-500 font-bold tracking-tighter">
-                {Data?.info?.totalRatingsString}
-              </div>
-            </div>
-          </div>
+          {/* Restaurant Header — Swiggy-style */}
+          <div ref={scroll}>
+            {/* Restaurant Name */}
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3">
+              {Data?.info?.name}
+            </h1>
 
-          <div className="flex flex-wrap gap-7 border-t border-t-slate-300 border-dashed pt-5">
-            <div className="text-gray-600 flex items-center gap-3 font-bold">
-              <MdAccessTimeFilled size={26} />
-              <span className="text-[17px] leading-4 ">
-                {Data?.info?.sla?.slaString}
-              </span>
-            </div>
-            <div className="text-gray-600 flex items-center gap-3 font-bold">
-              <HiOutlineCurrencyRupee size={26} />
-              <span className="text-[17px] leading-4 ">
-                {Data?.info?.costForTwoMessage}
-              </span>
+            {/* Info card */}
+            <div className='border-2 border-[#E6E6ED] bg-gradient-to-b from-white via-[#ebebf2] to-[#dfdfe7] rounded-2xl px-5 py-5 rounded-b-[36px]'>
+              <div className="bg-white px-5 py-5 rounded-b-[36px]">
+                {/* Rating · Cuisines · Cost for two */}
+                <div className="flex flex-wrap items-center gap-1 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="flex items-center gap-1 text-green-600 font-bold">
+                    <IoStar size={16} />
+                    {Data?.info?.avgRatingString}
+                  </span>
+                  <span className="text-gray-400 mx-1">·</span>
+                  <span className="text-gray-500 font-normal text-xs">
+                    ({Data?.info?.totalRatingsString})
+                  </span>
+                  <span className="text-gray-400 mx-1">·</span>
+                  <div className="flex items-center gap-1 text-gray-700">
+                    <HiOutlineCurrencyRupee size={15} />
+                    <span>{Data?.info?.costForTwoMessage}</span>
+                  </div>
+                </div>
+
+                {/* Cuisines */}
+                <div className="text-sm text-orange-500 font-semibold mb-3 cursor-pointer hover:underline">
+                  {Data?.info?.cuisines?.join(', ')}
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-dashed border-gray-200 pt-3 flex flex-col gap-2">
+                  {/* Outlet / Area */}
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
+                    <span className="font-semibold tracking-tight text-black">Outlet</span>
+                    <span>{Data?.info?.areaName}</span>
+                    <span className="text-gray-400">·</span>
+                    <span>{Data?.info?.sla?.lastMileTravelString}</span>
+                  </div>
+
+                  {/* Delivery time */}
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <MdAccessTimeFilled size={16} className="text-gray-400" />
+                    <span className="font-semibold text-black tracking-tight">
+                      {Data?.info?.sla?.slaString}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </>
       )}
-      <div className="text-xl font-bold">Deals for you</div>
-
       <OfferSlider offers={OfferData?.gridElements?.infoWithStyle?.offers} />
       {categories?.map((ele) => {
         return (

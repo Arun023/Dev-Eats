@@ -21,15 +21,15 @@ const RestaurantCard = ({ data }) => {
       to={`/restaurant/${id}${latitude ? '/' : ''}${latitude ? latitude : ''}${
         langitude ? '/' : ''
       }${langitude ? langitude : ''}`}
-      className="flex flex-col relative w-full hover:scale-95 duration-200"
+      className="flex flex-col relative w-[19.5rem] hover:scale-95 duration-200"
       key={id}>
       <img
         src={`${config.img_url}/${cloudinaryImageId}`}
-        className="w-96 h-52 object-cover rounded-2xl"
+        className="w-[19.5rem] h-52 object-cover rounded-2xl"
         alt=""
       />
       {aggregatedDiscountInfoV3 && (
-        <div className=" text-white coupon__background px-3 flex justify-start text-xl font-bold items-center uppercase h-16 absolute bottom-24 rounded-b-2xl w-96">
+        <div className=" text-white coupon__background px-3 flex justify-start text-xl font-bold items-center uppercase h-16 absolute bottom-24 rounded-b-2xl w-[19.5rem]">
           {`${aggregatedDiscountInfoV3?.header} ${
             aggregatedDiscountInfoV3.subHeader
               ? aggregatedDiscountInfoV3?.subHeader
