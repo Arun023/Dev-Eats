@@ -1,69 +1,58 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
+import { useCallback, useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
+import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
+import useEmblaCarousel from "embla-carousel-react";
+
 import { Skeleton } from "../../../components/ui/Skeleton";
 import { config } from "../../../config/config";
 
 const FoodSlider = ({ style, slider, title }) => {
-  const scrollRef = useRef(null);
+  // Embla replaces: useRef + all scroll state + listeners + ResizeObserver + RAF hacks
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start", // items start from left edge
+    dragFree: true, // smooth free drag (mouse + touch)
+    containScroll: "trimSnaps", // prevents over-scroll at edges
+  });
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // ✅ Accurate button state detection
+  // Embla tells us exactly when prev/next is possible — no manual math needed
   const updateButtons = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+    if (!emblaApi) return;
+    setCanScrollLeft(emblaApi.canScrollPrev());
+    setCanScrollRight(emblaApi.canScrollNext());
+  }, [emblaApi]);
 
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-
-    setCanScrollLeft(scrollLeft > 5);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
-  }, []);
-
-  // ✅ Smooth + responsive scroll
-  const scroll = (dir) => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const scrollAmount = el.clientWidth * 0.8;
-
-    el.scrollBy({
-      left: dir === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
-  };
-
-  // ✅ Scroll listeners (no debounce hack needed)
+  // Attach Embla events — replaces scroll + scrollend + ResizeObserver listeners
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+    if (!emblaApi) return;
 
     updateButtons();
 
-    el.addEventListener("scroll", updateButtons, { passive: true });
-
-    // modern browser support
-    el.addEventListener("scrollend", updateButtons);
+    emblaApi.on("init", updateButtons);
+    emblaApi.on("select", updateButtons); // fires after each scroll step
+    emblaApi.on("settle", updateButtons); // fires when scroll animation ends
+    emblaApi.on("reInit", updateButtons); // fires after reinit (resize, data change)
 
     return () => {
-      el.removeEventListener("scroll", updateButtons);
-      el.removeEventListener("scrollend", updateButtons);
+      emblaApi.off("init", updateButtons);
+      emblaApi.off("select", updateButtons);
+      emblaApi.off("settle", updateButtons);
+      emblaApi.off("reInit", updateButtons);
     };
-  }, [updateButtons]);
+  }, [emblaApi, updateButtons]);
 
-  // ✅ Resize handling
+  // When slider data loads (null → array), reinit so Embla measures new slides
   useEffect(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      updateButtons();
-    });
-
-    if (scrollRef.current) {
-      resizeObserver.observe(scrollRef.current);
+    if (emblaApi && slider) {
+      emblaApi.reInit();
     }
+  }, [emblaApi, slider]);
 
-    return () => resizeObserver.disconnect();
-  }, [updateButtons]);
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
     <div className="relative w-full">
@@ -78,51 +67,56 @@ const FoodSlider = ({ style, slider, title }) => {
       {slider && (
         <div className="flex justify-end px-4 mb-3 gap-2">
           <button
-            onClick={() => scroll("left")}
+            onClick={scrollPrev}
             disabled={!canScrollLeft}
-            className={`p-2 rounded-full transition ${canScrollLeft
+            aria-label="Scroll left"
+            className={`p-2 rounded-full transition-all duration-200 ${
+              canScrollLeft
                 ? "bg-gray-200 hover:bg-gray-300 cursor-pointer"
                 : "opacity-30 cursor-not-allowed"
-              }`}
+            }`}
           >
             <SlArrowLeft />
           </button>
 
           <button
-            onClick={() => scroll("right")}
+            onClick={scrollNext}
             disabled={!canScrollRight}
-            className={`p-2 rounded-full transition ${canScrollRight
+            aria-label="Scroll right"
+            className={`p-2 rounded-full transition-all duration-200 ${
+              canScrollRight
                 ? "bg-gray-200 hover:bg-gray-300 cursor-pointer"
                 : "opacity-30 cursor-not-allowed"
-              }`}
+            }`}
           >
             <SlArrowRight />
           </button>
         </div>
       )}
 
-      {/* Slider */}
+      {/* Slider — Embla needs: viewport (overflow-hidden) > container (flex) > slides */}
       <div className="mt-4 mb-10">
         {slider ? (
-          <div
-            ref={scrollRef}
-            className="flex gap-4 px-4 overflow-x-auto scroll-smooth no-scrollbar"
-          >
-            {slider.map((data) => (
-              <Link
-                key={data.id}
-                target="_blank"
-                to={data?.action?.link}
-                className="flex-shrink-0 rounded-lg transition-transform duration-300 hover:scale-105"
-              >
-                <img
-                  className={`object-cover ${style}`}
-                  src={`${config.img_url}/${data.imageId}`}
-                  alt={data.title || "food"}
-                  loading="lazy"
-                />
-              </Link>
-            ))}
+          <div ref={emblaRef} className="overflow-hidden px-4">
+            <div className="flex gap-4">
+              {slider.map((data) => (
+                <Link
+                  key={data.id}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  to={data?.action?.link}
+                  className="shrink-0 rounded-lg transition-transform duration-300 hover:scale-105"
+                >
+                  <img
+                    className={`object-cover ${style}`}
+                    src={`${config.img_url}/${data.imageId}`}
+                    alt={data.title || "food"}
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </Link>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex px-10 mt-10 gap-10">
