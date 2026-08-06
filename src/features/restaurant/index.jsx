@@ -1,16 +1,15 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
-import { MdAccessTimeFilled } from 'react-icons/md';
-import { HiOutlineCurrencyRupee } from 'react-icons/hi2';
-import { IoStar } from 'react-icons/io5';
-import { config } from '../../config/config';
-import { useFetchMenu } from '../../api';
-import RestaurantCategory from './components/RestaurantCategory';
-import OfferSlider from './components/OfferSlider';
+import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { MdAccessTimeFilled } from "react-icons/md";
+import { HiOutlineCurrencyRupee } from "react-icons/hi2";
+import { IoStar } from "react-icons/io5";
+import { useFetchMenu } from "../../api";
+import RestaurantCategory from "./components/RestaurantCategory";
+import OfferSlider from "./components/OfferSlider";
 // import Shimmer from "./shimmer/Shimmer";
 const RestaurantView = () => {
   const scroll = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState('');
+  const [currentIndex, setCurrentIndex] = useState("");
   const { id } = useParams();
   const restData = useFetchMenu(id);
   const Data = restData?.data?.cards?.[2]?.card?.card;
@@ -20,25 +19,24 @@ const RestaurantView = () => {
 
   const categories = groupedCards?.filter(
     (ele) =>
-      ele.card.card?.['@type'] ===
-      'type.googleapis.com/swiggy.presentation.food.v2.ItemCategory' ||
-      ele.card.card?.['@type'] ===
-      'type.googleapis.com/swiggy.presentation.food.v2.NestedItemCategory'
+      ele.card.card?.["@type"] ===
+        "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory" ||
+      ele.card.card?.["@type"] ===
+        "type.googleapis.com/swiggy.presentation.food.v2.NestedItemCategory",
   );
-  console.log('[groupedCards]', restData?.data);
+  console.log("[groupedCards]", restData?.data);
 
   useEffect(() => {
     const scrollToBottom = () => {
       scroll.current.scrollIntoView({
-        behavior: 'smooth',
-        postion: 'top',
+        behavior: "smooth",
+        postion: "top",
       });
     };
     if (scroll.current) {
       scrollToBottom();
     }
   }, [scroll]);
-
 
   if (!Data) return <div>Loading.</div>;
   if (!OfferData) return <div>Loading..</div>;
@@ -56,7 +54,7 @@ const RestaurantView = () => {
             </h1>
 
             {/* Info card */}
-            <div className='border-2 border-[#E6E6ED] bg-gradient-to-b from-white via-[#ebebf2] to-[#dfdfe7] rounded-2xl px-5 py-5 rounded-b-[36px]'>
+            <div className="border-2 border-[#E6E6ED] bg-gradient-to-b from-white via-[#ebebf2] to-[#dfdfe7] rounded-2xl px-5 py-5 rounded-b-[36px]">
               <div className="bg-white px-5 py-5 rounded-b-[36px]">
                 {/* Rating · Cuisines · Cost for two */}
                 <div className="flex flex-wrap items-center gap-1 text-sm font-semibold text-gray-800 mb-2">
@@ -77,7 +75,7 @@ const RestaurantView = () => {
 
                 {/* Cuisines */}
                 <div className="text-sm text-orange-500 font-semibold mb-3 cursor-pointer hover:underline">
-                  {Data?.info?.cuisines?.join(', ')}
+                  {Data?.info?.cuisines?.join(", ")}
                 </div>
 
                 {/* Divider */}
@@ -85,7 +83,9 @@ const RestaurantView = () => {
                   {/* Outlet / Area */}
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
-                    <span className="font-semibold tracking-tight text-black">Outlet</span>
+                    <span className="font-semibold tracking-tight text-black">
+                      Outlet
+                    </span>
                     <span>{Data?.info?.areaName}</span>
                     <span className="text-gray-400">·</span>
                     <span>{Data?.info?.sla?.lastMileTravelString}</span>
