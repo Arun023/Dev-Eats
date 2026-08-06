@@ -6,7 +6,8 @@ import { IoStar } from "react-icons/io5";
 import { useFetchMenu } from "../../api";
 import RestaurantCategory from "./components/RestaurantCategory";
 import OfferSlider from "./components/OfferSlider";
-// import Shimmer from "./shimmer/Shimmer";
+import RestaurantSkeleton from "./components/RestaurantSkeleton";
+
 const RestaurantView = () => {
   const scroll = useRef(null);
   const [currentIndex, setCurrentIndex] = useState("");
@@ -38,9 +39,9 @@ const RestaurantView = () => {
     }
   }, [scroll]);
 
-  if (!Data) return <div>Loading.</div>;
-  if (!OfferData) return <div>Loading..</div>;
-  if (!categories) return <div>Loading...</div>;
+  if (!Data || !OfferData || !categories) {
+    return <RestaurantSkeleton />;
+  }
 
   return (
     <div className="max-w-4xl px-md-0 px-10 mx-auto my-20 flex flex-col gap-5">

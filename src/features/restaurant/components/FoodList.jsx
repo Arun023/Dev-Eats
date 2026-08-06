@@ -1,20 +1,24 @@
-import { MdOutlineCurrencyRupee } from 'react-icons/md';
-import { IoStar } from 'react-icons/io5';
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { config } from '../../../config/config';
-import { addToCart, clearCart, removeItem } from '../../../store/slices/cartSlice';
+import { MdOutlineCurrencyRupee } from "react-icons/md";
+import { IoStar } from "react-icons/io5";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { config } from "../../../config/config";
+import {
+  addToCart,
+  clearCart,
+  removeItem,
+} from "../../../store/slices/cartSlice";
 const FoodList = ({ restaurant, ...itemCards }) => {
   const dispatch = useDispatch();
   const Cart = useSelector((state) => state.cart.items);
   const [showModal, setShowModal] = useState(false);
 
+  const foodItemCard = itemCards?.card?.info;
+
   const ExistingRestaurant = Cart.find(
-    (data) => data.restaurant.info.id === restaurant.info.id
+    (data) => data.restaurant.info.id === restaurant.info.id,
   );
-  const ExitingItem = Cart.find(
-    (ele) => ele.item.id === itemCards?.card.info.id
-  );
+  const ExitingItem = Cart.find((ele) => ele.item.id === foodItemCard.id);
 
   const AddItem = (id) => {
     if (ExistingRestaurant || Cart?.length === 0)
@@ -31,6 +35,12 @@ const FoodList = ({ restaurant, ...itemCards }) => {
   const RemoveItem = (id) => {
     dispatch(removeItem({ item: id }));
   };
+
+  const rating = foodItemCard?.ratings?.aggregatedRating?.rating;
+  const ratingCount =
+    foodItemCard?.ratings?.aggregatedRating?.ratingCountV2 ||
+    foodItemCard?.ratings?.aggregatedRating?.ratingCount;
+
   return (
     <>
       {showModal ? (
@@ -48,12 +58,14 @@ const FoodList = ({ restaurant, ...itemCards }) => {
                 <div className="w-full flex gap-3 pb-5">
                   <button
                     onClick={() => setShowModal(!showModal)}
-                    className="border-[3px] text-green-500 font-bold border-green-500 w-full h-14">
+                    className="border-[3px] text-green-500 font-bold border-green-500 w-full h-14"
+                  >
                     NO
                   </button>
                   <button
-                    onClick={() => AddNewItem(itemCards?.card?.info)}
-                    className="border-2 border-green-600 w-full h-14 bg-green-600 text-white font-semibold">
+                    onClick={() => AddNewItem(foodItemCard)}
+                    className="border-2 border-green-600 w-full h-14 bg-green-600 text-white font-semibold"
+                  >
                     YES, START AFRESH
                   </button>
                 </div>
@@ -63,115 +75,138 @@ const FoodList = ({ restaurant, ...itemCards }) => {
           <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
         </>
       ) : null}
-      <div
-        key={itemCards?.card.info.id}
-        className="border-b-2 my-5 py-5 flex flex-col">
-        <div className="flex gap-4 justify-between items-center relative">
-          <div className="w-9/12">
-            <div className="flex items-center gap-2">
-              <div
-                className={`${
-                  itemCards?.card.info.itemAttribute?.vegClassifier === 'VEG'
-                    ? 'veg'
-                    : 'nonveg'
-                }`}></div>
-              <span className="flex justify-center items-center gap-1">
-                {itemCards?.card.info.isBestseller && (
-                  <>
-                    <IoStar color="#ee9c00" />
-                    <span className="text-sm font-semibold text-[#ee9c00]">
-                      Bestseller
-                    </span>
-                  </>
-                )}
+      <div key={foodItemCard.id} className="border-b border-gray-200 py-6 flex justify-between items-start gap-4">
+        <div className="w-8/12 md:w-9/12 flex flex-col">
+          <div className="flex items-center gap-2">
+            <div
+              className={`${
+                foodItemCard.itemAttribute?.vegClassifier === "VEG"
+                  ? "veg"
+                  : "nonveg"
+              }`}
+            ></div>
+            {foodItemCard.isBestseller && (
+              <span className="flex items-center gap-1 text-xs font-semibold text-[#ee9c00]">
+                <IoStar color="#ee9c00" />
+                Bestseller
               </span>
-            </div>
-            <div className="text-lg font-semibold text-gray-600 mt-1">
-              {itemCards?.card.info.name}
-            </div>
-            <div className="flex items-center gap-2">
+            )}
+          </div>
+          <h3 className="text-lg font-bold text-gray-800 mt-1">
+            {foodItemCard.name}
+          </h3>
+          <div className="flex items-center gap-2 mt-1 font-bold text-gray-800 text-base">
+            {foodItemCard?.isNinetyninestoreItem && foodItemCard?.finalPrice ? (
+              <>
+                <div className="flex items-center text-gray-400 line-through text-sm font-normal">
+                  <MdOutlineCurrencyRupee />
+                  {foodItemCard.price
+                    ? foodItemCard.price / 100
+                    : foodItemCard.defaultPrice / 100}
+                </div>
+                <div className="flex items-center bg-[#5255f3] text-white px-2 py-0.5 rounded-sm font-bold text-sm">
+                  <MdOutlineCurrencyRupee />{foodItemCard.finalPrice / 100}
+                </div>
+              </>
+            ) : (
               <div className="flex items-center">
                 <MdOutlineCurrencyRupee />
-                {itemCards?.card.info.price
-                  ? itemCards?.card.info.price / 100
-                  : itemCards?.card.info.defaultPrice / 100}
+                {foodItemCard.price
+                  ? foodItemCard.price / 100
+                  : foodItemCard.defaultPrice / 100}
               </div>
-              {itemCards?.card.info.offerTags && (
-                <span
-                  className={`${
-                    itemCards?.card.info.offerTags[0]?.backgroundColor &&
-                    'bg-[#FAE8E3] text-[#DB6742] text-sm px-2'
-                  } `}>
-                  <span className="font-semibold">
-                    {itemCards?.card.info.offerTags[0]?.title}
-                  </span>{' '}
-                  | {itemCards?.card.info.offerTags[0]?.subTitle}
-                </span>
+            )}
+            {foodItemCard.offerTags && (
+              <span
+                className={`${
+                  foodItemCard.offerTags[0]?.backgroundColor &&
+                  "bg-[#FAE8E3] text-[#DB6742] text-sm px-2"
+                } `}
+              >
+                <span className="font-semibold">
+                  {foodItemCard.offerTags[0]?.title}
+                </span>{" "}
+                {foodItemCard.offerTags[0]?.subTitle}
+              </span>
+            )}
+          </div>
+          {rating && (
+            <div className="flex items-center gap-1 mt-1 text-xs md:text-sm font-bold text-emerald-700">
+              <IoStar className="text-emerald-700 fill-current" />
+              <span>{rating}</span>
+              {ratingCount && (
+                <span className="text-gray-500 font-normal">({ratingCount})</span>
               )}
             </div>
-            <p className="my-5 text-gray-400 text-sm">
-              {itemCards?.card.info.description}
+          )}
+          {foodItemCard.description && (
+            <p className="mt-3 text-gray-500 text-sm leading-relaxed">
+              {foodItemCard.description}
             </p>
-          </div>
-          {itemCards?.card.info.imageId ? (
-            <div className="relative">
-              <div className="">
-                <img
-                  src={`${config.img_url}/${itemCards?.card.info.imageId}`}
-                  className="w-36 h-24 object-cover rounded-xl"
-                  alt=""
-                />
-              </div>
-              <div className="flex items-center addCard">
-                {ExitingItem ? (
-                  <div className="border-2 border-gray-200 gap-3 flex px-6 py-2 bg-stone-50 rounded-lg">
-                    <span
-                      className="text-center mx-auto  font-medium rounded-lg  cursor-pointer"
-                      onClick={() => RemoveItem(itemCards?.card?.info)}>
-                      -
-                    </span>
-                    <span>{ExitingItem?.count}</span>
-                    <span
-                      className="text-center mx-auto  font-medium rounded-lg  cursor-pointer"
-                      onClick={() => AddItem(itemCards?.card?.info)}>
-                      +
-                    </span>
-                  </div>
-                ) : (
-                  <button
-                    className="text-center mx-auto border-2 bg-slate-100 border-gray-200 px-8 py-2 shadow-xl  duration-200 text-green-500  font-bold rounded-lg  cursor-pointer"
-                    onClick={() => AddItem(itemCards?.card?.info)}>
-                    ADD
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center absolute right-5 bottom-0">
+          )}
+        </div>
+        {foodItemCard.imageId ? (
+          <div className="relative flex flex-col items-center shrink-0 w-36 md:w-40">
+            <img
+              src={`${config.img_url}/${foodItemCard.imageId}`}
+              className="w-36 h-28 md:w-40 md:h-32 object-cover rounded-2xl shadow-sm"
+              alt={foodItemCard.name}
+            />
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
               {ExitingItem ? (
-                <div className="border-2 border-gray-200 gap-3 flex px-6 py-2 bg-stone-50 rounded-lg">
+                <div className="border border-gray-300 bg-white shadow-md rounded-xl px-3 py-1.5 flex items-center gap-3 text-green-600 font-extrabold text-sm">
                   <span
-                    className="text-center mx-auto font-medium rounded-lg cursor-pointer bg-slate-100 border-gray-200 shadow-xl"
-                    onClick={() => RemoveItem(itemCards?.card?.info)}>
+                    className="cursor-pointer select-none px-1 text-gray-600 hover:text-green-600"
+                    onClick={() => RemoveItem(foodItemCard)}
+                  >
                     -
                   </span>
-                  <span>{ExitingItem?.count}</span>
+                  <span className="text-gray-800 font-bold">{ExitingItem?.count}</span>
                   <span
-                    className="text-center mx-auto  font-medium rounded-lg  cursor-pointer"
-                    onClick={() => AddItem(itemCards?.card?.info)}>
+                    className="cursor-pointer select-none px-1 text-gray-600 hover:text-green-600"
+                    onClick={() => AddItem(foodItemCard)}
+                  >
                     +
                   </span>
                 </div>
               ) : (
                 <button
-                  className="text-center mx-auto border-2 bg-slate-100 border-gray-200 px-8 py-2 shadow-xl  duration-200 text-green-500  font-bold rounded-lg  cursor-pointer"
-                  onClick={() => AddItem(itemCards?.card?.info)}>
-                  Add
+                  className="border border-gray-300 bg-white px-7 py-1.5 shadow-md hover:shadow-lg duration-200 text-green-600 font-bold rounded-xl cursor-pointer hover:bg-slate-50 text-sm tracking-wide"
+                  onClick={() => AddItem(foodItemCard)}
+                >
+                  ADD
                 </button>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="shrink-0 w-36 md:w-40 flex justify-center items-center">
+            {ExitingItem ? (
+              <div className="border border-gray-300 bg-white shadow-md rounded-xl px-3 py-1.5 flex items-center gap-3 text-green-600 font-extrabold text-sm">
+                <span
+                  className="cursor-pointer select-none px-1 text-gray-600 hover:text-green-600"
+                  onClick={() => RemoveItem(foodItemCard)}
+                >
+                  -
+                </span>
+                <span className="text-gray-800 font-bold">{ExitingItem?.count}</span>
+                <span
+                  className="cursor-pointer select-none px-1 text-gray-600 hover:text-green-600"
+                  onClick={() => AddItem(foodItemCard)}
+                >
+                  +
+                </span>
+              </div>
+            ) : (
+              <button
+                className="border border-gray-300 bg-white px-7 py-1.5 shadow-md hover:shadow-lg duration-200 text-green-600 font-bold rounded-xl cursor-pointer hover:bg-slate-50 text-sm tracking-wide"
+                onClick={() => AddItem(foodItemCard)}
+              >
+                ADD
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
