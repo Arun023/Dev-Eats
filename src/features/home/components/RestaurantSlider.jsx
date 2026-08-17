@@ -2,9 +2,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 import RestaurantCard from "./RestaurantCard";
+import { Skeleton } from "../../../components/ui/Skeleton";
 
-const ResturantSlider = ({ slider }) => {
-  //   const NewlyOpenRestaurant = isVegRestaurant(RestaurantCard);
+const ResturantSlider = ({ slider, title }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     dragFree: true,
@@ -20,7 +20,6 @@ const ResturantSlider = ({ slider }) => {
     setCanScrollRight(emblaApi.canScrollNext());
   }, [emblaApi]);
 
-  // Attach Embla events for button state
   useEffect(() => {
     if (!emblaApi) return;
 
@@ -39,7 +38,6 @@ const ResturantSlider = ({ slider }) => {
     };
   }, [emblaApi, updateButtons]);
 
-  // Re-init when slider data loads (null → array)
   useEffect(() => {
     if (emblaApi && slider) {
       emblaApi.reInit();
@@ -50,52 +48,68 @@ const ResturantSlider = ({ slider }) => {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <>
-      {/* Arrows */}
-      <div className="flex items-end justify-end gap-4">
-        <button
-          onClick={scrollPrev}
-          disabled={!canScrollLeft}
-          aria-label="Scroll left"
-          className={`bg-gray-300 rounded-full py-3 px-3 transition-all duration-200 ${
-            canScrollLeft
-              ? "cursor-pointer hover:bg-gray-400"
-              : "opacity-30 cursor-not-allowed"
-          }`}
-        >
-          <SlArrowLeft size={20} />
-        </button>
+    <div className="w-full my-6">
+      {/* Header: Title on Left, Arrows on Right */}
+      {title && (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{title}</h2>
 
-        <button
-          onClick={scrollNext}
-          disabled={!canScrollRight}
-          aria-label="Scroll right"
-          className={`bg-gray-300 rounded-full py-3 px-3 transition-all duration-200 ${
-            canScrollRight
-              ? "cursor-pointer hover:bg-gray-400"
-              : "opacity-30 cursor-not-allowed"
-          }`}
-        >
-          <SlArrowRight size={20} />
-        </button>
-      </div>
-
-      {/* Slider */}
-      <div className="flex flex-col justify-center items-start mb-10 mt-4 relative">
-        <div ref={emblaRef} className="overflow-hidden w-full">
-          <div className="flex gap-3">
-            {slider?.map((data) => (
-              <div
-                key={data?.info?.id}
-                className="w-[19.5rem] shrink-0 rounded overflow-hidden"
+          {slider && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={scrollPrev}
+                disabled={!canScrollLeft}
+                aria-label="Scroll left"
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  canScrollLeft
+                    ? "bg-gray-200 hover:bg-gray-300 text-gray-800 cursor-pointer"
+                    : "bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed"
+                }`}
               >
-                <RestaurantCard data={{ ...data.info }} />
-              </div>
+                <SlArrowLeft size={16} />
+              </button>
+
+              <button
+                onClick={scrollNext}
+                disabled={!canScrollRight}
+                aria-label="Scroll right"
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  canScrollRight
+                    ? "bg-gray-200 hover:bg-gray-300 text-gray-800 cursor-pointer"
+                    : "bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed"
+                }`}
+              >
+                <SlArrowRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Slider Viewport */}
+      <div>
+        {slider ? (
+          <div ref={emblaRef} className="overflow-hidden w-full">
+            <div className="flex gap-4">
+              {slider.map((data) => (
+                <div
+                  key={data?.info?.id}
+                  className="w-[17.5rem] sm:w-[19.5rem] shrink-0"
+                >
+                  <RestaurantCard slider data={{ ...data.info }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-hidden">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="w-[19.5rem] h-64 shrink-0 bg-slate-200 rounded-2xl" />
             ))}
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

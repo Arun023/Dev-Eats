@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-
 import { Link } from "react-router-dom";
 import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 import useEmblaCarousel from "embla-carousel-react";
@@ -8,33 +7,30 @@ import { Skeleton } from "../../../components/ui/Skeleton";
 import { config } from "../../../config/config";
 
 const FoodSlider = ({ style, slider, title }) => {
-  // Embla replaces: useRef + all scroll state + listeners + ResizeObserver + RAF hacks
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start", // items start from left edge
-    dragFree: true, // smooth free drag (mouse + touch)
-    containScroll: "trimSnaps", // prevents over-scroll at edges
+    align: "start",
+    dragFree: true,
+    containScroll: "trimSnaps",
   });
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Embla tells us exactly when prev/next is possible — no manual math needed
   const updateButtons = useCallback(() => {
     if (!emblaApi) return;
     setCanScrollLeft(emblaApi.canScrollPrev());
     setCanScrollRight(emblaApi.canScrollNext());
   }, [emblaApi]);
 
-  // Attach Embla events — replaces scroll + scrollend + ResizeObserver listeners
   useEffect(() => {
     if (!emblaApi) return;
 
     updateButtons();
 
     emblaApi.on("init", updateButtons);
-    emblaApi.on("select", updateButtons); // fires after each scroll step
-    emblaApi.on("settle", updateButtons); // fires when scroll animation ends
-    emblaApi.on("reInit", updateButtons); // fires after reinit (resize, data change)
+    emblaApi.on("select", updateButtons);
+    emblaApi.on("settle", updateButtons);
+    emblaApi.on("reInit", updateButtons);
 
     return () => {
       emblaApi.off("init", updateButtons);
@@ -44,7 +40,6 @@ const FoodSlider = ({ style, slider, title }) => {
     };
   }, [emblaApi, updateButtons]);
 
-  // When slider data loads (null → array), reinit so Embla measures new slides
   useEffect(() => {
     if (emblaApi && slider) {
       emblaApi.reInit();
@@ -55,49 +50,50 @@ const FoodSlider = ({ style, slider, title }) => {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <div className="relative w-full">
-      {/* Title */}
-      {title ? (
-        <div className="mx-10 my-5 text-2xl font-bold">{title}</div>
-      ) : (
-        <Skeleton className="mx-10 my-5 w-60 h-10 bg-slate-100" />
-      )}
+    <div className="w-full my-6">
+      {/* Header: Title on Left, Arrows on Right */}
+      <div className="flex items-center justify-between mb-4">
+        {title ? (
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{title}</h2>
+        ) : (
+          <Skeleton className="w-60 h-8 bg-slate-200 rounded-md" />
+        )}
 
-      {/* Arrows */}
-      {slider && (
-        <div className="flex justify-end px-4 mb-3 gap-2">
-          <button
-            onClick={scrollPrev}
-            disabled={!canScrollLeft}
-            aria-label="Scroll left"
-            className={`p-2 rounded-full transition-all duration-200 ${
-              canScrollLeft
-                ? "bg-gray-200 hover:bg-gray-300 cursor-pointer"
-                : "opacity-30 cursor-not-allowed"
-            }`}
-          >
-            <SlArrowLeft />
-          </button>
+        {slider && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={scrollPrev}
+              disabled={!canScrollLeft}
+              aria-label="Scroll left"
+              className={`p-2 rounded-full transition-all duration-200 ${
+                canScrollLeft
+                  ? "bg-gray-200 hover:bg-gray-300 text-gray-800 cursor-pointer"
+                  : "bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed"
+              }`}
+            >
+              <SlArrowLeft size={16} />
+            </button>
 
-          <button
-            onClick={scrollNext}
-            disabled={!canScrollRight}
-            aria-label="Scroll right"
-            className={`p-2 rounded-full transition-all duration-200 ${
-              canScrollRight
-                ? "bg-gray-200 hover:bg-gray-300 cursor-pointer"
-                : "opacity-30 cursor-not-allowed"
-            }`}
-          >
-            <SlArrowRight />
-          </button>
-        </div>
-      )}
+            <button
+              onClick={scrollNext}
+              disabled={!canScrollRight}
+              aria-label="Scroll right"
+              className={`p-2 rounded-full transition-all duration-200 ${
+                canScrollRight
+                  ? "bg-gray-200 hover:bg-gray-300 text-gray-800 cursor-pointer"
+                  : "bg-gray-100 text-gray-400 opacity-40 cursor-not-allowed"
+              }`}
+            >
+              <SlArrowRight size={16} />
+            </button>
+          </div>
+        )}
+      </div>
 
-      {/* Slider — Embla needs: viewport (overflow-hidden) > container (flex) > slides */}
-      <div className="mt-4 mb-10">
+      {/* Food Slider Viewport */}
+      <div>
         {slider ? (
-          <div ref={emblaRef} className="overflow-hidden px-4">
+          <div ref={emblaRef} className="overflow-hidden w-full">
             <div className="flex gap-4">
               {slider.map((data) => (
                 <Link
@@ -108,7 +104,7 @@ const FoodSlider = ({ style, slider, title }) => {
                   className="shrink-0 rounded-lg transition-transform duration-300 hover:scale-105"
                 >
                   <img
-                    className={`object-cover ${style}`}
+                    className={`object-cover ${style || 'w-36 h-36'}`}
                     src={`${config.img_url}/${data.imageId}`}
                     alt={data.title || "food"}
                     loading="lazy"
@@ -119,9 +115,9 @@ const FoodSlider = ({ style, slider, title }) => {
             </div>
           </div>
         ) : (
-          <div className="flex px-10 mt-10 gap-10">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton key={i} className="w-36 h-36 bg-slate-100" />
+          <div className="flex mt-4 gap-6 overflow-hidden">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="w-36 h-36 shrink-0 bg-slate-200 rounded-full" />
             ))}
           </div>
         )}

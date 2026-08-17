@@ -20,7 +20,7 @@ import { Sheet, SheetClose, SheetContent } from "../components/ui/Sheet";
 const NAV_ITEMS = [
   { to: "/", Icon: IoHomeOutline, label: "Home" },
   { to: "/search", Icon: IoSearch, label: "Search" },
-  { to: "/about", Icon: TbDiscount, label: "Offers" },
+  { to: "/about", Icon: TbDiscount, label: "About" },
   { to: "/contact", Icon: GrContactInfo, label: "Help" },
 ];
 

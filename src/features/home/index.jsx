@@ -6,24 +6,6 @@ import ResturantSlider from "./components/RestaurantSlider";
 import RestaurantCard from "./components/RestaurantCard";
 import { useHomeData } from "./hooks/useHomeData";
 
-// const swiggyNotPresent =
-//   actualData?.communication?.swiggyNotPresent?.swiggyNotPresent;
-
-// const RestaurantChain =
-//   SwiggyData?.[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
-
-// const sliderTitle = SwiggyData?.[0]?.card.card?.header?.title;
-// const sliderFoodData =
-//   SwiggyData?.[0]?.card.card?.gridElements?.infoWithStyle.info;
-
-// const restaurantFilter = SwiggyData[3]?.card?.card;
-// const restaurantFilterOuter = restaurantFilter?.facetList?.filter(
-//   (data) => data?.id !== "catalog_cuisines",
-// );
-
-// const RestaurantOnline =
-//   SwiggyData[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
-
 const HomeView = () => {
   const currentLocation = useSelector(authSelector);
   const { latitude, longitude } = currentLocation || {};
@@ -46,45 +28,55 @@ const HomeView = () => {
     restaurantOnline,
   } = useHomeData(SwiggyData, actualData);
 
-  console.log("custom logger [  SwiggyData, actualData,]", {
-    SwiggyData,
-    actualData,
-  });
-
   return (
-    <div className="px-20">
+    <div className="w-full max-w-[84%] mx-auto px-2 sm:px-4 py-4">
+      {/* 1. Food Slider ("What's on your mind?") */}
       <FoodSlider
-        style="w-full h-60"
+        style="w-36 h-36"
         slider={sliderFoodData}
         title={sliderTitle}
       />
-      {chainTitle && (
-        <div className="text-2xl font-bold px-5 my-5">{chainTitle}</div>
-      )}
-      <ResturantSlider slider={restaurantChain} />
+
+      <hr className="my-8 border-gray-200" />
+
+      {/* 2. Top Restaurant Chains Slider */}
+      <ResturantSlider slider={restaurantChain} title={chainTitle} />
+
+      <hr className="my-8 border-gray-200" />
+
+      {/* 3. Online Restaurants Title */}
       {onlineTitle && (
-        <div className="text-2xl font-bold mt-5 mb-5">{onlineTitle}</div>
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight my-5">
+          {onlineTitle}
+        </h2>
       )}
+
+      {/* Active Filters */}
       {activeFilters.length > 0 && (
-        <div className="text-base text-gray-700 font-medium mb-5 flex items-center flex-wrap gap-5">
+        <div className="text-sm text-gray-700 font-medium mb-6 flex items-center flex-wrap gap-3">
           {activeFilters.map((filter) => (
-            <span
+            <button
               key={filter.id}
-              className="px-3 border py-1 border-gray-300 rounded-full"
+              className="px-4 py-1.5 border border-gray-300 hover:border-gray-400 rounded-full bg-white text-gray-700 transition-colors shadow-sm cursor-pointer"
             >
               {filter.label}
-            </span>
+            </button>
           ))}
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 place-items-center gap-5">
+
+      {/* 4. Online Restaurants Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {restaurantOnline?.map((res) => (
-          <div key={res.info.id}>
+          <div key={res.info.id} className="w-full justify-center">
             <RestaurantCard data={{ ...res.info }} />
           </div>
         ))}
+
         {restaurantOnline?.length === 0 && !isLoading && (
-          <h2>No Restaurant Found</h2>
+          <div className="col-span-full text-center py-10 text-gray-500 font-medium text-lg">
+            No Restaurants Found
+          </div>
         )}
       </div>
     </div>
