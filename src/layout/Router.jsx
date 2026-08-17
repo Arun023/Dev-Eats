@@ -1,50 +1,41 @@
-import { createBrowserRouter } from 'react-router-dom';
-// import { Suspense, lazy } from 'react';
-import Error from '../components/error';
-import AppLayout from './AppLayout';
-import Home from '../pages/Home';
-import Search from '../pages/Search';
-import CartPage from '../pages/cart';
-import RestaurantPage from '../pages/Restaurant';
-// const About = lazy(() => import('./pages/About'));
-// const ContactForm = lazy(() => import('./components/ContactForm'));
+import { createBrowserRouter } from "react-router-dom";
+import Error from "../components/error";
+import AppLayout from "./AppLayout";
+import Home from "../pages/Home";
+import Search from "../pages/Search";
+import CartPage from "../pages/cart";
+import RestaurantPage from "../pages/Restaurant";
+import AboutPage from "../pages/about";
+import ContactPage from "../pages/contact";
 
 const appRouter = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     errorElement: <Error />,
     element: <AppLayout />,
     children: [
       {
-        path: '/',
+        path: "/",
         element: <Home />,
       },
       {
-        path: '/search',
+        path: "/search",
         element: <Search />,
       },
       {
-        path: '/cart',
+        path: "/cart",
         element: <CartPage />,
       },
-      //   {
-      //     path: '/about',
-      //     element: (
-      //       <Suspense fallback={<div className="text-2xl">Hello</div>}>
-      //         <About />
-      //       </Suspense>
-      //     ),
-      //   },
-      //   {
-      //     path: '/contact',
-      //     element: (
-      //       <Suspense fallback={<div className="text-2xl">Hello</div>}>
-      //         <ContactForm />
-      //       </Suspense>
-      //     ),
-      //   },
       {
-        path: '/restaurant/:id/:latitude?/:langitude?',
+        path: "/about",
+        element: <AboutPage />,
+      },
+      {
+        path: "/contact",
+        element: <ContactPage />,
+      },
+      {
+        path: "/restaurant/:id/:latitude?/:langitude?",
         element: <RestaurantPage />,
       },
     ],
@@ -52,3 +43,4 @@ const appRouter = createBrowserRouter([
 ]);
 
 export default appRouter;
+

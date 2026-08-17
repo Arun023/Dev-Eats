@@ -1,12 +1,27 @@
 import { useMemo } from "react";
 
 /**
- * Custom hook to efficiently and safely process Swiggy home page cards.
- * Prevents UI breaks caused by fragile array indexing by dynamically searching cards by ID, type, and data structure.
- * Uses useMemo to avoid costly re-computation on subsequent component renders.
+ * Custom hook to efficiently process home page data.
+ * Utilizes pre-normalized data directly from Dev-Eats Backend when available,
+ * with resilient fallback extraction if raw card array is supplied.
  */
 export const useHomeData = (swiggyData, actualData) => {
   return useMemo(() => {
+    // 1. Prefer pre-normalized data from Dev-Eats Backend
+    if (actualData && (actualData.sliderFoodData || actualData.restaurantOnline)) {
+      return {
+        swiggyNotPresent:
+          actualData?.communication?.swiggyNotPresent?.swiggyNotPresent,
+        sliderTitle: actualData.sliderTitle || "",
+        sliderFoodData: actualData.sliderFoodData || null,
+        chainTitle: actualData.chainTitle || "",
+        restaurantChain: actualData.restaurantChain || null,
+        onlineTitle: actualData.onlineTitle || "",
+        activeFilters: actualData.activeFilters || [],
+        restaurantOnline: actualData.restaurantOnline || null,
+      };
+    }
+
     if (!Array.isArray(swiggyData) || swiggyData.length === 0) {
       return {
         swiggyNotPresent:
@@ -21,7 +36,7 @@ export const useHomeData = (swiggyData, actualData) => {
       };
     }
 
-    // 1. Food Slider Card ("whats_on_your_mind")
+    // 2. Fallback client extraction if raw array is passed
     const foodSliderCard =
       swiggyData.find(
         (c) =>
@@ -37,7 +52,6 @@ export const useHomeData = (swiggyData, actualData) => {
       foodSliderCard?.card?.card?.imageGridCards?.info ||
       null;
 
-    // 2. Top Restaurant Chains Card ("top_brands_for_you")
     const restaurantChainCard =
       swiggyData.find(
         (c) =>
@@ -54,7 +68,6 @@ export const useHomeData = (swiggyData, actualData) => {
       restaurantChainCard?.card?.card?.gridElements?.infoWithStyle
         ?.restaurants || null;
 
-    // 3. Online Title Card ("popular_restaurants_title")
     const onlineTitleCard =
       swiggyData.find(
         (c) =>
@@ -69,7 +82,6 @@ export const useHomeData = (swiggyData, actualData) => {
       onlineTitleCard?.card?.card?.header?.title ||
       "";
 
-    // 4. Restaurant Filter Card ("facetList")
     const filterCard =
       swiggyData.find(
         (c) =>
@@ -91,11 +103,12 @@ export const useHomeData = (swiggyData, actualData) => {
         }))
     );
 
-    // 5. Online Restaurants Grid Card ("restaurant_grid_listing")
     const restaurantOnlineCard =
       swiggyData.find(
         (c) =>
           c?.card?.card?.id === "restaurant_grid_listing" ||
+          c?.card?.card?.id === "restaurant_grid_listing_v2" ||
+          c?.card?.card?.id?.includes("restaurant_grid") ||
           c?.card?.card?.["@type"]?.includes("ListingWidget") ||
           (c?.card?.card?.gridElements?.infoWithStyle?.restaurants &&
             c !== restaurantChainCard &&
